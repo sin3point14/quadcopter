@@ -2,9 +2,17 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "renderer.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }
 
 int main()
@@ -32,9 +40,14 @@ int main()
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    Renderer renderer;
 
     while (!glfwWindowShouldClose(window))
     {
+        processInput(window);
+
+        renderer.render();
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
