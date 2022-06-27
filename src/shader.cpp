@@ -86,11 +86,3 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }
-
-
-void Shader::setMat4(const std::string& name, const glm::mat4& matrix) const
-{
-    int matrixLoc = glGetUniformLocation(m_ShaderProgram, name.c_str());
-    glUniformMatrix4fv(matrixLoc, 1, GL_FALSE, &matrix[0][0]);
-}
-

@@ -25,8 +25,10 @@ void Renderer::draw(double time, const std::vector<std::unique_ptr<Object>>& obj
 	{
 		if (object->getShaderType() == shader)
 		{
-			glm::mat4 currModel = object->getModel() * prevModel;
+			glm::mat4 currModel = prevModel * object->getModel(time);
+
 			m_Shaders[(int)shader]->setMat4("model", currModel);
+			m_Shaders[(int)shader]->setVec3("baseColor", object->getBaseColor());
 
 			glBindVertexArray(object->getVAO());
 			glDrawArrays(GL_TRIANGLES, 0, object->getVertexCount());

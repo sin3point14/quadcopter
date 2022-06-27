@@ -1,8 +1,9 @@
 #include "object.h"
 
-Object::Object(const glm::mat4& model, const std::vector<float>& vertices, Shader::ShaderType shadertype)
+Object::Object(const AnimatableModel& model, const std::vector<float>& vertices, const glm::vec3& baseColor, Shader::ShaderType shadertype)
 	: m_Model(model)
 	, m_Vertices(vertices)
+	, m_BaseColor(baseColor)
 	, m_ShaderType(shadertype)
 {
 	// VBO & VAO
@@ -16,4 +17,17 @@ Object::Object(const glm::mat4& model, const std::vector<float>& vertices, Shade
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 	glEnableVertexAttribArray(0);
+}
+
+glm::mat4 Object::getModel(double time)
+{
+	if (glm::mat4* model = std::get_if<glm::mat4>(&m_Model))
+	{
+		return *model;
+	}
+	else
+	{
+		auto modelFunc = std::get<std::function<glm::mat4(double)>>(m_Model);
+		return modelFunc(time);
+	}
 }
