@@ -46,7 +46,9 @@ int main()
     {
         processInput(window);
 
-        renderer.render();
+        double timeValue = glfwGetTime();
+
+        renderer.render(timeValue);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
