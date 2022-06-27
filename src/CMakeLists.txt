@@ -14,4 +14,5 @@ target_link_libraries(Quadcopter PUBLIC
     glad
     glfw
     ${GLFW_LIBRARIES}
+    glm
 )
