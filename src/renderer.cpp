@@ -2,33 +2,42 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "renderer.h"
 
-Renderer::Renderer() 
+Renderer::Renderer()
 {
 	m_Shaders.emplace_back(std::make_unique<Shader>("shaders/main.vert", "shaders/main.frag"));
 
-	// VBO & VAO
-	glGenBuffers(1, &m_VBO);
-	glGenVertexArrays(1, &m_VAO);
-	glGenBuffers(1, &m_EBO);
-
-	glBindVertexArray(m_VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(s_Vertices), s_Vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(s_Indices), s_Indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-	glEnableVertexAttribArray(0);
+	for (auto&& shader : m_Shaders) {
+		shader->setMat4("projection", m_Scene.getProjection());
+		shader->setMat4("view", m_Scene.getView());
+	}
 }
 
-void Renderer::render(double deltaTime)
+void Renderer::draw(double time, const std::vector<std::unique_ptr<Object>>& objects, glm::mat4 prevModel, Shader::ShaderType shader)
 {
-	m_Shaders[0]->use();
-	glBindVertexArray(m_VAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	for (auto&& object : objects)
+	{
+		if (object->getShaderType() == shader)
+		{
+			glm::mat4 currModel = object->getModel();
+			m_Shaders[(int)shader]->setMat4("model", currModel);
+
+			glBindVertexArray(object->getVAO());
+			glDrawArrays(GL_TRIANGLES, 0, object->getVertexCount());
+			draw(time, object->getChildren(), currModel, shader);
+		}
+	}
+}
+
+void Renderer::render(double time)
+{
+	m_Shaders[(int)Shader::ShaderType::NORMAL]->use();
+	glm::mat4 identity = glm::identity<glm::mat4>();
+	draw(time, m_Scene.getRootChildren(), identity, Shader::ShaderType::NORMAL);
 	glBindVertexArray(0);
 }
